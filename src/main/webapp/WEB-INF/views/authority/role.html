@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- BEGIN HEAD -->
+<head>
+    <meta charset="utf-8"/>
+    <title>角色管理</title>
+    <style type="text/css">
+        .pagination-panel .btn {
+            color: #FFF !important;
+            background-color: #217ebd !important;
+            border-color: #1f78b5 !important;
+        }
+    </style>
+</head>
+<!-- END HEAD -->
+
+<body class="page-header-fixed page-sidebar-closed-hide-logo page-content-white">
+<div class="portlet light bordered">
+    <div class="portlet-title">
+        <div class="caption font-dark">
+            <i class="icon-settings font-dark"></i>
+            <span class="caption-subject bold uppercase">角色管理</span>
+        </div>
+        <div class="actions">
+            <div class="btn-group btn-group-devided" data-toggle="buttons">
+                <a class="btn btn green" onclick="add()"> 新增
+                    <i class="fa fa-plus"></i>
+                </a>
+                &nbsp;&nbsp;
+                <a class="btn btn yellow" onclick="edit()"> 编辑
+                    <i class="fa fa-edit"></i>
+                </a>
+                &nbsp;&nbsp;
+                <a class="btn btn red" onclick="del()"> 删除
+                    <i class="fa fa-remove"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="portlet-body">
+
+        <!--<div id="sample_1_wrapper" class="dataTables_wrapper no-footer">-->
+        <div class="row">
+
+        </div>
+        <div class="table-scrollable">
+            <table class="table table-striped table-bordered  table-header-fixed table-hover table-checkable order-column dataTable no-footer "
+                   id="sample_1" role="grid" aria-describedby="sample_1_info">
+                <thead>
+                <tr role="row">
+                    <th rowspan="1" colspan="1" aria-label=" " style="width: 106px;">
+                        <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
+                            <input type="checkbox" class="group-checkable" data-set="#sample_1.checkboxes">
+                            <span></span>
+                        </label>
+                    </th>
+                    <th tabindex="0" aria-controls="sample_1" rowspan="1" colspan="1" style="width: 80px;">角色ID
+                    </th>
+                    <th tabindex="0" aria-controls="sample_1" rowspan="1" colspan="1" style="width: 150px;"> 角色名称
+                    </th>
+                    <th tabindex="0" aria-controls="sample_1" rowspan="1" colspan="1" style="width: 260px;"> 角色描述
+                    </th>
+                    <th tabindex="0" aria-controls="sample_1" rowspan="1" colspan="1" style="width: 100px;">状态
+                    </th>
+                    <th tabindex="0" aria-controls="sample_1" rowspan="1" colspan="1" style="width: 208px;">操作
+                    </th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+        <!--</div>-->
+    </div>
+</div>
+
+<!--角色新增弹出框-->
+<div id="roleModal" class="modal fade" tabindex="-1" data-focus-on="input:first">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+        <h4 class="modal-title">
+            <i class="icon-bubble font-green-sharp"></i>
+            <span class="caption-subject font-green-sharp bold uppercase">角色管理</span>
+        </h4>
+    </div>
+    <form class="form-horizontal" role="form" id="roleForm">
+        <div class="modal-body">
+            <div class="portlet-body form">
+                <div class="form-body">
+                    <input type="hidden" name="roleId"/>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">角色名称</label>
+                        <div class="col-md-9">
+                            <div class="input-icon">
+                                <i class="fa fa-bell-o"></i>
+                                <input type="text" name="roleName" class="form-control" placeholder="角色名称">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">角色描述</label>
+
+                        <div class="col-md-9">
+                            <div class="input-icon">
+                                <i class="fa fa-bell-o"></i>
+                                <input type="text" name="roleDesc" class="form-control" placeholder="角色描述">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">初始状态</label>
+
+                        <div class="col-md-9">
+                            <select class="form-control" name="status">
+                                <option value="1">正常</option>
+                                <option value="0">禁用</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn default">取消</button>
+            <button type="button" class="btn green m-icon" id="saveRole">保存</button>
+        </div>
+    </form>
+</div>
+
+
+<!--授权弹出框-->
+<div id="roleAuthModal" class="modal fade" tabindex="-1" data-focus-on="input:first">
+    <input type="hidden" id="roleIdForGrant"/>
+
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+        <h6 class="modal-title">
+            <i class="icon-bubble font-red-sharp"></i>
+            <span class="caption-subject font-red-sharp bold uppercase">授权</span>
+        </h6>
+    </div>
+    <div class="modal-body">
+        <div id="authTree" class="tree-demo jstree jstree-2 jstree-default jstree-checkbox-selection"
+             role="tree" aria-multiselectable="true" tabindex="0"
+             aria-busy="false" aria-selected="false">
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" data-dismiss="modal" class="btn default">取消</button>
+        <button type="button" id="grantAuth" class="btn green m-icon" id="save">保存</button>
+    </div>
+</div>
+<script type="text/javascript">
+    var roleTable;
+    $(function () {
+        var a = 0;
+        App.getViewPort().width < App.getResponsiveBreakpoint("md") ? $(".page-header").hasClass("page-header-fixed-mobile") && (a = $(".page-header").outerHeight(!0)) : $(".page-header").hasClass("navbar-fixed-top") ? a = $(".page-header").outerHeight(!0) : $("body").hasClass("page-header-fixed") && (a = 64);
+        roleTable=$("#sample_1").DataTable({
+            ajax: {
+                "url": "${ctx}/role/list",
+                "type": "POST",
+                "data": function (d) {
+                    d.page = $("#sample_1").DataTable().page() + 1;
+                    var row = $("select[name='sample_1_length']").val();
+                    d.rows = row == undefined ? 0 : row;
+                }
+            },
+            "bProcessing": true,
+            "bStateSave": !0,
+            "lengthMenu": [5, 15, 20],
+            "lengthChange": true,
+            "pageLength": 5,
+            "pagingType": "bootstrap_extended",
+            "fixedHeader": {"header": !0, "headerOffset": a},
+            "ordering": false,
+            "bInfo": true,
+            "processing": true,
+            "serverSide": true,
+            "searching": false,
+            "columns": [
+                {
+                    "data": "roleId", "render": function (data, type, full, meta) {
+                    return "<label class='mt-checkbox mt-checkbox-single mt-checkbox-outline'>" +
+                            "<input type='checkbox' class='checkboxes' value='" + data + "' /><span></span></label>";
+                }
+                },
+                {"data": "roleId"},
+                {"data": "roleName"},
+                {"data": "roleDesc"},
+                {
+                    "data": "status", "render": function (data, type, full, meta) {
+                    var label;
+                    if (data == 1) {
+                        label = "<span class='label label label-success'>正常</span>";
+                    }
+                    if (data == 0) {
+                        label = "<span class='label label label-danger'>禁用</span>";
+                    }
+                    return label;
+                }
+                },
+                {
+                    "data": null, "render": function (data, type, full, meta) {
+                    var click = "<a href='javascript:;' class='btn btn-circle btn-sm blue' onclick='showGrantAuthModal(" + full.roleId + ")'" + "><i class='fa fa-edit'></i>授权</a>";
+                    return click;
+                }
+                }
+            ],
+            "dom": 'rt<"bottom"ilp<"clear">>',
+            "language": {
+                aria: {
+                    sortAscending: ": activate to sort column ascending",
+                    sortDescending: ": activate to sort column descending"
+                },
+                emptyTable: "暂无记录",
+                info: "显示 _START_ - _END_ / 共: _TOTAL_ 条 ",
+                infoEmpty: "暂无记录",
+                lengthMenu: "  _MENU_ 条",
+//                infoFiltered: "[filtered1 from _MAX_ total records]&nbsp;&nbsp;",
+                search: "查询:",
+                zeroRecords: "暂无记录",
+                paginate: {previous: "上一页", next: "下一页", last: "尾页", first: "首页", "page": "", "pageOf": ""}
+            }
+        });
+
+        $('#roleForm').bootstrapValidator({
+            message: '请输入正确的值',
+            submitButtons: '#saveRole',
+            //trigger: "change",
+            fields: {
+                roleName: {
+                    message: '角色名验证失败',
+                    validators: {
+                        notEmpty: {
+                            message: '角色名不能为空'
+                        }
+                    }
+                },
+                roleDesc: {
+                    message: '角色描述验证失败',
+                    validators: {
+                        notEmpty: {
+                            message: '角色描述不能为空'
+                        }
+                    }
+                },
+                status: {
+                    message: '角色状态验证失败',
+                    validators: {
+                        notEmpty: {
+                            message: '角色状态不能为空'
+                        }
+                    }
+                }
+            }
+        });
+        $("#saveRole").click(function () {
+            var bv = $("#roleForm").data('bootstrapValidator');
+            bv.validate();
+            if (bv.isValid()){
+                $.ajax({
+                    url: "${ctx}/role/saveRole",
+                    type: "post",
+                    data: $("#roleForm").serialize(),
+                    success: function (data) {
+                        data = eval(data);
+                        if (data.status) {
+                            Table.reload(roleTable);
+                            $("#roleModal").modal('hide');
+                            swal("Oops...", "保存成功!", "success");
+                        } else {
+                            $("#roleModal").modal('hide');
+                            swal("Oops...", "保存失败:" + data.errorMsg, "error");
+                        }
+                        return;
+                    },
+                    error: function () {
+                        $("#roleModal").modal('hide');
+                        swal("Oops...", "保存出错:" + data.errorMsg, "error");
+                        return;
+                    }
+                })
+            }
+        })
+
+        //生成授权权限树
+        TreeUtil.generateTree("${ctx}/authority/findAuthorityMap", "authTree");
+        $("#grantAuth").click(function () {
+            var authIds = TreeUtil.getSelected("authTree");
+            $.ajax({
+                url: "${ctx}/role/grantAuths",
+                type: "post",
+                data: {roleId: $("#roleIdForGrant").val(), authIds: authIds.join()},
+                success: function (data) {
+                    data = eval(data);
+                    if (data.status) {
+                        $("#roleAuthModal").modal('hide');
+                        swal("Oops...", "授权成功!", "success");
+                    } else {
+                        $("#roleAuthModal").modal('hide');
+                        swal("Oops...", "授权失败:" + data.errorMsg, "error");
+                    }
+                },
+                error: function (data) {
+                    $("#roleAuthModal").modal('hide');
+                    swal("Oops...", "授权出错:" + data.errorMsg, "error");
+                }
+            })
+        });
+    })
+
+
+    function showGrantAuthModal(id) {
+        $('#authTree').jstree('deselect_all');
+        $.ajax({
+            url: "${ctx}/role/listAuth",
+            type: "post",
+            data: {roleId: id},
+            async: false,
+            success: function (data) {
+                data = eval(data);
+                $.each(data, function (i, n) {
+                    $("#authTree").jstree().select_node(n.id);
+                });
+            }
+        })
+        $("#roleIdForGrant").val(id);
+        $("#roleAuthModal").modal('show');
+    }
+
+    function add() {
+        Form.clear("roleForm");
+        $("#roleModal").modal('show');
+    }
+
+    function edit() {
+        var ids = Table.getSelectIds(roleTable);
+        var length = ids.length;
+        if (length != 1) {
+            if (length < 1) {
+                swal("Oops...", "请选择您需要编辑的记录！", "info");
+            } else if (length > 1) {
+                swal("Oops...", "一次只能编辑一条信息！", "info");
+            }
+            return;
+        }
+        $.ajax({
+            url: "${ctx}/role/getRole",
+            type: "post",
+            data: {roleId: ids[0]},
+            success: function (data) {
+                Form.load("roleForm", data);
+                $("#roleModal").modal('show');
+            }
+        })
+    }
+
+    function del() {
+        var ids = Table.getSelectIds(roleTable);
+        var length = ids.length;
+        if (length != 1) {
+            if (length < 1) {
+                swal("Oops...", "请选择您需要编辑的记录！", "info");
+            } else if (length > 1) {
+                swal("Oops...", "一次只能编辑一条信息！", "info");
+            }
+            return;
+        }
+        swal({title: "温馨提示?",
+            text: "您确定删除已选中记录吗!",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonClass: "btn-danger",
+            confirmButtonText: "确定",
+            cancelButtonText: "取消",
+            closeOnConfirm: false
+        },function () {
+            $.ajax({
+                url: "${ctx}/role/deleteRoles",
+                type: "post",
+                data: {authIds: authIds.join()},
+                success: function (data) {
+                    data = eval(data);
+                    if (data.status) {
+                        Table.reload(roleTable);
+                        swal("Oops...", "删除成功!", "success");
+                    } else {
+                        swal("Oops...", "删除失败", "error");
+                    }
+                }
+            })
+        });
+    }
+
+</script>
+</body>
+
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- BEGIN HEAD -->
+<head>
+    <meta charset="utf-8"/>
+    <title>通知公告管理</title>
+    <style type="text/css">
+        .pagination-panel .btn {
+            color: #FFF !important;
+            background-color: #217ebd !important;
+            border-color: #1f78b5 !important;
+        }
+    </style>
+</head>
+<!-- END HEAD -->
+
+<body class="page-header-fixed page-sidebar-closed-hide-logo page-content-white">
+<div class="portlet light bordered">
+    <div class="portlet-title">
+        <div class="caption font-dark">
+            <i class="icon-settings font-dark"></i>
+            <span class="caption-subject bold uppercase">通知公告管理</span>
+        </div>
+        <div class="actions">
+            <div class="btn-group btn-group-devided" data-toggle="buttons">
+                <a class="btn btn green" onclick="add()"> 新增
+                    <i class="fa fa-plus"></i>
+                </a>
+                &nbsp;&nbsp;
+                <a class="btn btn red" onclick="del()"> 删除
+                    <i class="fa fa-remove"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="portlet-body">
+        <div class="row">
+
+        </div>
+        <div class="table-scrollable">
+            <table class="table table-striped table-bordered  table-header-fixed table-hover table-checkable order-column dataTable no-footer "
+                   id="noticeTable" role="grid" aria-describedby="noticeTable_info">
+                <thead>
+                <tr role="row">
+                    <th rowspan="1" colspan="1" aria-label=" " style="width: 106px;">
+                        <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
+                            <input type="checkbox" class="group-checkable" data-set="#sample_1.checkboxes">
+                            <span></span>
+                        </label>
+                    </th>
+                    <th tabindex="0" aria-controls="noticeTable" rowspan="1" colspan="1" style="width: 80px;">公告ID
+                    </th>
+                    <th tabindex="0" aria-controls="noticeTable" rowspan="1" colspan="1" style="width: 150px;"> 标题</th>
+                    <th tabindex="0" aria-controls="noticeTable" rowspan="1" colspan="1" style="width: 150px;"> 公告类型
+                    </th>
+                    <th tabindex="0" aria-controls="noticeTable" rowspan="1" colspan="1" style="width: 260px;"> 发布人</th>
+                    <th tabindex="0" aria-controls="noticeTable" rowspan="1" colspan="1" style="width: 230px;"> 发布时间
+                    </th>
+                    <th tabindex="0" aria-controls="noticeTable" rowspan="1" colspan="1" style="width: 208px;">内容详情</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+<div id="contentModal" class="modal fade" tabindex="-1">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+        <h4 class="modal-title">
+            <i class="icon-bubble font-green-sharp"></i>
+            <span class="caption-subject font-green-sharp bold uppercase">通知公告详情</span>
+        </h4>
+    </div>
+    <div id="contentWrapper" style="min-height: 260px; max-height: 400px;overflow-y:auto">
+
+    </div>
+</div>
+</body>
+<script type="text/javascript">
+    var noticeTable;
+    $(function () {
+        var a = 0;
+        App.getViewPort().width < App.getResponsiveBreakpoint("md") ? $(".page-header").hasClass("page-header-fixed-mobile") && (a = $(".page-header").outerHeight(!0)) : $(".page-header").hasClass("navbar-fixed-top") ? a = $(".page-header").outerHeight(!0) : $("body").hasClass("page-header-fixed") && (a = 64);
+        noticeTable=$("#noticeTable").DataTable({
+            ajax: {
+                "url": "${ctx}/notice/noticeList",
+                "type": "POST",
+                "data": function (d) {
+                    d.page = $("#noticeTable").DataTable().page() + 1;
+                    var row = $("select[name='noticeTable_length']").val();
+                    d.rows = row == undefined ? 0 : row;
+                }
+            },
+            "bProcessing": true,
+            "bStateSave": !0,
+            "lengthMenu": [10, 20, 50,100],
+            "lengthChange": true,
+            "pageLength": 10,
+            "pagingType": "bootstrap_extended",
+            "fixedHeader": {"header": !0, "headerOffset": a},
+            "ordering": false,
+            "bInfo": true,
+            "processing": true,
+            "serverSide": true,
+            "searching": false,
+            "columns": [
+                {
+                    "data": "noticeId", "render": function (data, type, full, meta) {
+                    return "<label class='mt-checkbox mt-checkbox-single mt-checkbox-outline'>" +
+                            "<input type='checkbox' class='checkboxes' value='" + data + "' /><span></span></label>";
+                }
+                },
+                {"data": "noticeId"},
+                {"data": "noticeTitle"},
+                {"data": "noticeTypeName"},
+                {"data": "optUserName"},
+                {
+                    "data": "createTime", "render": function (data, type, full, meta) {
+                    if (data != null && data != undefined) {
+                        return TimerUtil.transFormDate(data);
+                    }
+                    return "";
+                }
+                },
+                {
+                    "data": null, "render": function (data, type, full, meta) {
+                    var click = "<a href='javascript:;' class='btn btn-circle btn-sm blue' onclick='showContent(" + full.noticeId + ")'" + "><i class='fa fa-mouse-pointer'></i>内容详情</a>";
+                    return click;
+                }
+                }
+            ],
+            "dom": 'rt<"bottom"ilp<"clear">>',
+            "language": {
+                aria: {
+                    sortAscending: ": activate to sort column ascending",
+                    sortDescending: ": activate to sort column descending"
+                },
+                emptyTable: "暂无记录",
+                info: "显示 _START_ - _END_ / 共: _TOTAL_ 条 ",
+                infoEmpty: "暂无记录",
+                lengthMenu: "  _MENU_ 条",
+                search: "查询:",
+                zeroRecords: "暂无记录",
+                paginate: {previous: "上一页", next: "下一页", last: "尾页", first: "首页", "page": "", "pageOf": ""}
+            }
+        });
+    });
+
+
+    function add() {
+        Layout.loadAjaxContent("${ctx}/notice/addNotice");
+    }
+
+    function del() {
+        var ids = Table.getSelectIds(noticeTable);
+        var length = ids.length;
+        if (length < 1) {
+            swal("Oops...", "请选择您需要删除的记录！", "info");
+            return;
+        }
+        swal({
+            title: "温馨提示?",
+            text: "您确定删除已选中记录吗!",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonClass: "btn-danger",
+            confirmButtonText: "确定",
+            cancelButtonText: "取消",
+            closeOnConfirm: false
+        }, function () {
+            $.ajax({
+                url: "${ctx}/notice/deleteNotice",
+                type: "post",
+                data: {ids: ids.join()},
+                success: function (data) {
+                    data = eval(data);
+                    if (data.status) {
+                        Table.reload(noticeTable);
+                        swal("Oops...", "删除成功!", "success");
+                    } else {
+                        swal("Oops...", "删除失败", "error");
+                    }
+                }
+            })
+        });
+    }
+
+    function showContent(id) {
+        var url="${ctx}/notice/backDetail?goback=yes&noticeId="+id;
+        Layout.loadAjaxContent(url);
+    }
+</script>
+</html>

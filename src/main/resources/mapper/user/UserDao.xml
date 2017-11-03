@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.finley.module.user.dao.UserDao">
+
+    <insert id="addUser" parameterType="User" useGeneratedKeys="true" keyProperty="userId">
+        insert into cms_user(user_name,real_name,phone,email,password,user_type,status,role_id)
+            values(#{userName},#{realName},#{phone},#{email},#{password},#{userType},1,#{roleId})
+    </insert>
+
+    <update id="updateUser" parameterType="User">
+        update cms_user
+        <trim prefix="set" suffixOverrides=",">
+            <if test="realName != null and realName!=''">
+                real_name=#{realName},
+            </if>
+            <if test="password != null and password!=''">
+                password=#{password},
+            </if>
+            <if test="email != null and email!=''">
+                email=#{email},
+            </if>
+            <if test="phone != null and phone!=''">
+                phone=#{phone},
+            </if>
+            <if test="gender != null">
+                gender=#{gender},
+            </if>
+            <if test="status != null ">
+                status=#{status},
+            </if>
+            <if test="roleId != null">
+                role_id=#{roleId},
+            </if>
+        </trim>
+       where user_id=#{userId}
+    </update>
+
+    <update id="modifyPassword" parameterType="User">
+        update cms_user
+            set password=#{password}
+        where user_id=#{userId}
+    </update>
+
+    <select id="findUser" resultType="User">
+        select
+          user_id as userId,
+          user_name as userName,
+          gender as gender,
+          real_name as realName,
+          password as password,
+          user_type as userType,
+          phone as phone,
+          email as email,
+          status as status,
+          role_id as roleId
+         from cms_user
+        <where>
+            1=1
+            <if test="userName!=null and userName!=''">
+                and  user_name=#{userName}
+            </if>
+            <if test="password!=null and password!=''">
+                and  password=#{password}
+            </if>
+            <if test="gender!=null">
+                and  gender=#{gender}
+            </if>
+
+            <if test="userType!=null">
+                and user_type=#{userType}
+            </if>
+
+            <if test="status!=null">
+                and status=#{status}
+            </if>
+
+            <if test="roleId!=null">
+                and role_id=#{roleId}
+            </if>
+        </where>
+    </select>
+
+    <select id="findUserByCondition" resultType="User">
+        select
+        user_id as userId,
+        user_name as userName,
+        gender as gender,
+        real_name as realName,
+        password as password,
+        user_type as userType,
+        phone as phone,
+        email as email,
+        status as status,
+        role_id as roleId
+        from cms_user
+        <where>
+            <if test="realName!=null and realName!=''">
+                or  real_name=#{realName}
+            </if>
+            <if test="phone!=null and phone!=''">
+                or  phone=#{phone}
+            </if>
+
+            <if test="email!=null and email!=''">
+                or  email=#{email}
+            </if>
+        </where>
+    </select>
+
+    <select id="findUserByPage" resultType="User" parameterType="User">
+        select
+          user_id as userId,
+          user_name as userName,
+          gender as gender,
+          real_name as realName,
+          password as password,
+          user_type as userType,
+          phone as phone,
+          email as email,
+          status as status,
+          role_id as roleId
+        from cms_user
+        <where>
+            user_type=1
+            <if test="gender!=null">
+               and  gender=#{gender}
+            </if>
+
+            <if test="userType!=null">
+               and user_type=#{userType}
+            </if>
+
+            <if test="status!=null">
+                and status=#{status}
+            </if>
+
+            <if test="roleId!=null">
+                and role_id=#{roleId}
+            </if>
+        </where>
+        <choose>
+            <when test="startRow!=null and rows!=null">
+                limit #{startRow},#{rows}
+            </when>
+        </choose>
+    </select>
+
+    <select id="countUsers" parameterType="User" resultType="int">
+        select count(*) from cms_user
+        <where>
+            user_type=1
+            <if test="gender!=null">
+                and  gender=#{gender}
+            </if>
+
+            <if test="userType!=null">
+                and user_type=#{userType}
+            </if>
+
+            <if test="status!=null">
+                and status=#{status}
+            </if>
+
+            <if test="roleId!=null">
+                and role_id=#{roleId}
+            </if>
+        </where>
+    </select>
+
+    <select id="getUser" resultType="User" parameterType="User">
+        select
+        user_id as userId,
+        user_name as userName,
+        gender as gender,
+        real_name as realName,
+        password as password,
+        user_type as userType,
+        phone as phone,
+        email as email,
+        status as status,
+        role_id as roleId
+        from cms_user
+        where  user_id=#{userId}
+    </select>
+    
+    <select id="isUserNameExist" resultType="int"  parameterType="string">
+        select count(*) from cms_user where user_name=#{userName}
+    </select>
+</mapper>

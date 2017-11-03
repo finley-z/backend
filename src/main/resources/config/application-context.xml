@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans.xsd
+      http://www.springframework.org/schema/task
+      http://www.springframework.org/schema/task/spring-task.xsd
+      http://www.springframework.org/schema/tx
+      http://www.springframework.org/schema/tx/spring-tx.xsd
+      http://www.springframework.org/schema/context
+      http://www.springframework.org/schema/context/spring-context.xsd
+      http://www.springframework.org/schema/aop
+      http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+
+    <!-- 扫描指定package下所有带有如@services,@resource-->
+    <context:component-scan base-package="com.finley"/>
+
+    <!-- 初始化数据 -->
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:config/jdbc.properties</value>
+            </list>
+        </property>
+        <property name="ignoreUnresolvablePlaceholders" value="true"/>
+    </bean>
+
+    <!--jdbc数据源配置-->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+        <property name="jdbcUrl" value="${jdbc.url}"/>
+        <property name="user" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <property name="driverClass" value="${jdbc.driver}"/>
+        <property name="initialPoolSize" value="${jdbc.initialPoolSize}"/>
+        <property name="minPoolSize" value="${jdbc.minPoolSize}"/>
+        <property name="maxPoolSize" value="${jdbc.maxPoolSize}"/>
+        <property name="maxStatements" value="${jdbc.maxStatements}"/>
+    </bean>
+
+    <!-- Mybatis's sqlSessionFactory 配置 -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <!-- 自动匹配Mapper映射文件 -->
+        <property name="mapperLocations" value="classpath:mapper/**/*.xml"/>
+        <property name="configLocation" value="classpath:config/mybatis-config.xml"/>
+        <property name="typeAliasesPackage" value="com.finley.module.**.entity"/>
+    </bean>
+
+    <!-- spring自动扫描mybatis -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.finley.module.**.dao"/>
+    </bean>
+
+    <!-- 事物指定数据源 -->
+    <bean name="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+
+    <!-- 使用annotation定义事务 -->
+    <tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true"/>
+
+    <!-- 激活自动代理功能 -->
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
+
+
+    <!--redis 连接池-->
+    <bean id="redisPool" class="redis.clients.jedis.JedisPoolConfig">
+        <property name="maxIdle" value="${redis.maxIdle}"/>
+        <property name="maxActive" value="${redis.maxActive}"/>
+        <property name="maxWait" value="${redis.maxWait}"/>
+        <property name="testOnBorrow" value="${redis.testOnBorrow}"/>
+    </bean>
+
+    <bean id="connectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory"
+          p:host-name="${redis.host}" p:port="${redis.port}"  p:pool-config-ref="redisPool"/>
+
+    <!--redis 工具类-->
+    <bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate">
+        <property name="connectionFactory" ref="connectionFactory"/>
+    </bean>
+
+
+    <!--Spring邮件发送配置-->
+    <!-- 加载Properties文件 -->
+    <bean id="configurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:config/mail.properties</value>
+                <value>classpath:config/redis.properties</value>
+            </list>
+        </property>
+    </bean>
+    <bean id="mailMessage" class="org.springframework.mail.SimpleMailMessage">
+        <property name="from" value="${mail.from}"/>
+        <!-- 查看SimpleMailMessage源码还可以注入标题,内容等 -->
+    </bean>
+
+    <!-- 申明JavaMailSenderImpl对象 -->
+    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+        <property name="defaultEncoding" value="UTF-8" />
+        <property name="host" value="${mail.host}" />
+        <property name="username" value="${mail.username}" />
+        <property name="password" value="${mail.password}" />
+        <property name="javaMailProperties">
+            <props>
+                <!-- 设置认证开关 -->
+                <prop key="mail.smtp.auth">true</prop>
+                <!-- 启动调试开关 -->
+                <prop key="mail.debug">true</prop>
+                <!-- 设置发送延时 -->
+                <prop key="mail.smtp.timeout">0</prop>
+            </props>
+        </property>
+    </bean>
+
+    <!--开启定时任务-->
+    <task:annotation-driven/>
+
+</beans>

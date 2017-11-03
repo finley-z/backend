@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- BEGIN HEAD -->
+<head>
+    <meta charset="utf-8"/>
+    <title>通知公告</title>
+    <link href="${ctx}/resource/ueeditor/themes/default/css/ueditor.min.css" rel="stylesheet"/>
+    <!-- 配置文件 -->
+    <script type="text/javascript" charset="utf-8" src="${ctx}/resource/ueeditor/ueditor.config.js"></script>
+    <!-- 编辑器源码文件 -->
+    <script type="text/javascript" charset="utf-8" src="${ctx}/resource/ueeditor/ueditor.all.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="${ctx}/resource/ueeditor/lang/zh-cn/zh-cn.js"></script>
+</head>
+
+<body class="page-header-fixed page-sidebar-closed-hide-logo page-content-white">
+<div class="portlet light bordered">
+    <div class="portlet-title">
+        <div class="caption font-dark">
+            <i class="icon-settings font-dark"></i>
+            <span class="caption-subject bold uppercase">编辑通知公告</span>
+        </div>
+        <div class="actions">
+            <div class="btn-group btn-group-devided" data-toggle="buttons">
+                <a href="javascript:;" class="btn green" style="margin-left: 50px;" id="publish">
+                    <i class="fa fa-edit"></i>发布
+                </a>
+                <a href="javascript:;" class="btn yellow-crusta" id="goback">
+                    <i class="fa fa-mail-forward"></i>返回
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="portlet-body">
+        <div class="form-body">
+            <div class="form-inline">
+                <div class="form-group">
+                    <label>标题:&nbsp;&nbsp;&nbsp;</label>
+                    <input type="text" class="form-control input-xlarge" id="noticeTitle" placeholder="请输入标题..">
+                </div>
+
+                <div class="form-group" style="margin-left: 20px;">
+                    <label>公告类型:&nbsp;&nbsp;&nbsp;</label>
+                    <select class="form-control input-large" id="noticeTypeSelector">
+                        <option value="1">面向所有用户</option>
+                        <option value="3">面向代理商用户</option>
+                        <option value="2">面向系统用户</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="contentEditor" style="margin-top: 15px;">
+                <!-- 加载编辑器的容器 -->
+                <script id="container" name="content" type="text/plain" style="height:400px;"></script>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!-- 实例化编辑器 -->
+<script type="text/javascript">
+    var ue = UE.getEditor('container');
+    $(function () {
+        $("#publish").click(function () {
+            $.ajax({
+                url: "${ctx}/notice/saveNotice",
+                type: "post",
+                data: {
+                    noticeTitle: $("#noticeTitle").val(), noticeContent: ue.getContent(),
+                    noticeType: $("#noticeTypeSelector").val()
+                },
+                success: function (data) {
+                    data = eval(data);
+                    if (data.status) {
+                        swal({
+                            title: "提交成功",
+                            text: "",
+                            type: "info",
+                            closeOnConfirm: true,
+                            showLoaderOnConfirm: true,
+                        }, function () {
+                            Layout.loadAjaxContent("${ctx}/notice/toNotice");
+                        });
+                    } else {
+                        swal("Oops...", "保存失败:" + data.errorMsg, "error");
+                    }
+                    return;
+                },
+                error: function () {
+                    $("#brandModal").modal('hide');
+                    swal("Oops...", "保存出错:" + data.errorMsg, "error");
+                    return;
+                }
+            })
+        });
+        $("#goback").click(function () {
+            Layout.loadAjaxContent("${ctx}/notice/toNotice");
+        });
+    });
+</script>
+
+</body>
+
+</html>

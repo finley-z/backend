@@ -1,0 +1,82 @@
+<!-- BEGIN FOOTER -->
+<div class="page-footer">
+    <div class="page-footer-inner"> 2017 © WEBBASE. finley同学 QQ:573108440
+    </div>
+    <div class="scroll-to-top">
+        <i class="icon-arrow-up"></i>
+    </div>
+</div>
+<!-- END FOOTER -->
+
+<!--[if lt IE 9]>
+<script src="${ctx}/resource/assets/global/plugins/respond.min.js"></script>
+<script src="${ctx}/resource/assets/global/plugins/excanvas.min.js"></script>
+<script src="${ctx}/resource/assets/global/plugins/ie8.fix.min.js"></script>
+<![endif]-->
+
+<!-- 系统全局脚本（JAVASCRIPT） -->
+<script src="${ctx}/resource/assets/global/plugins/jquery.min.js" type="text/javascript"></script>
+<script src="${ctx}/resource/assets/global/plugins/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+<script src="${ctx}/resource/assets/global/plugins/js.cookie.min.js" type="text/javascript"></script>
+<script src="${ctx}/resource/assets/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js"  type="text/javascript"></script>
+<script src="${ctx}/resource/assets/global/plugins/jquery.blockui.min.js" type="text/javascript"></script>
+<!-- 系统全局脚本（JAVASCRIPT） -->
+
+<!-- 系统核心脚本（JAVASCRIPT） -->
+<script src="${ctx}/resource/assets/global/scripts/app.min.js" type="text/javascript"></script>
+<!-- 系统核心脚本（JAVASCRIPT） -->
+
+<!-- 系统插件脚本（JAVASCRIPT） -->
+<script src="${ctx}/resource/assets/pages/scripts/ui-tree.min.js" type="text/javascript"></script>
+<script src="${ctx}/resource/assets/global/plugins/bootstrap-modal/js/bootstrap-modalmanager.js" type="text/javascript"></script>
+<script src="${ctx}/resource/assets/global/plugins/bootstrap-modal/js/bootstrap-modal.js" type="text/javascript"></script>
+<script src="${ctx}/resource/assets/pages/scripts/ui-extended-modals.min.js" type="text/javascript"></script>
+<script src="${ctx}/resource/assets/global/plugins/bootstrap-sweetalert/sweetalert.min.js" type="text/javascript"></script>
+<script src="${ctx}/resource/assets/pages/scripts/ui-sweetalert.min.js" type="text/javascript"></script>
+<script src="${ctx}/resource/assets/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
+<script src="${ctx}/resource/assets/global/scripts/datatable.js" type="text/javascript"></script>
+<script src="${ctx}/resource/assets/global/plugins/datatables/datatables.all.min.js" type="text/javascript"></script>
+<script src="${ctx}/resource/assets/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
+<script src="${ctx}/resource/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+<script src="${ctx}/resource/assets/global/plugins/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.zh-CN.js"
+        type="text/javascript"></script>
+<!-- 系统插件脚本（JAVASCRIPT） -->
+
+<!-- 系统页面布局脚本（JAVASCRIPT） -->
+<script src="${ctx}/resource/assets/layouts/layout/scripts/layout.min.js" type="text/javascript"></script>
+<script src="${ctx}/resource/code/js/common.js" type="text/javascript"></script>
+<script src="${ctx}/resource/code/js/menu.js" type="text/javascript"></script>
+<script src="${ctx}/resource/assets/global/plugins/bootstrap-validator/js/bootstrapValidator.min.js"></script>
+
+<!-- 系统页面布局脚本（JAVASCRIPT） -->
+<script type="text/javascript">
+    $(function () {
+        $.ajax({
+            url:"${ctx}/user/getAuthMenu",
+            type:"POST",
+            cache:true,
+            success:function(data){
+                if(data!=null&&data!=""){
+                    Menu.initMenu("searchForm",data,"${ctx}");
+                }
+            }
+        })
+        Layout.addAjaxContentSuccessCallback(function(res){
+            var activeItem=$(".sub-menu>.nav-item").filter(".active");
+            var menuName=$(activeItem).find("a").attr("menuname");
+            $("#menuName").html(menuName);
+
+        });
+
+        $("#more-notice").click(function(){
+            Layout.loadAjaxContent("${ctx}/notice/backList");
+        });
+        $(document).on("click",".notice-item",function(){
+            var url=$(this).attr("data-href");
+            Layout.loadAjaxContent(url);
+        });
+        Notice.generateNoticeList(2);
+    })
+
+</script>
+

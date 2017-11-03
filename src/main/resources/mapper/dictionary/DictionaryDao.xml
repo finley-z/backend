@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.finley.module.dictionary.dao.DictionaryDao">
+
+    <resultMap id="dictionaryMap" type="DictionaryType">
+        <id column="type_id" property="typeId"/>
+
+        <collection property="dictionaryList" column="typeId" ofType="Dictionary"
+                    javaType="java.util.List" select="getDictionariesList"></collection>
+    </resultMap>
+
+    <insert id="addDictionaryType" parameterType="DictionaryType">
+        insert into cms_dictionary_type(type_id,type_code,type_name,type_desc,status)
+        values(#{typeId},#{typeCode},#{typeName},#{typeDesc},#{status})
+    </insert>
+
+    <insert id="addDictionary" parameterType="Dictionary">
+        insert into cms_dictionary(type_id,`key`,`value`,status)
+        values(#{typeId},#{key},#{value},#{status})
+    </insert>
+
+    <update id="updateDictionaryType" parameterType="DictionaryType">
+        update cms_dictionary_type
+        <trim prefix="set" suffixOverrides=",">
+            <if test="status != null">
+                status=#{status},
+            </if>
+            <if test="typeCode != null and typeCode!=''">
+                type_code=#{typeCode},
+            </if>
+            <if test="typeName != null and typeName!=''">
+                type_name=#{typeName},
+            </if>
+            <if test="typeDesc != null and typeDesc!=''">
+                type_desc=#{typeDesc},
+            </if>
+        </trim>
+        where type_id=#{typeId}
+    </update>
+
+    <update id="updateDictionary" parameterType="Dictionary">
+        update cms_dictionary
+        <trim prefix="set" suffixOverrides=",">
+            <if test="typeId != null">
+                type_id=#{typeId},
+            </if>
+            <if test="key != null and key!=''">
+                `key`=#{key},
+            </if>
+            <if test="value != null and value!=''">
+                `value`=#{value},
+            </if>
+            <if test="status != null">
+                status=#{status},
+            </if>
+        </trim>
+        where dictionary_id=#{dictionaryId}
+    </update>
+
+    <select id="getDictionaryTypes" resultType="DictionaryType" parameterType="DictionaryType">
+        SELECT
+        t.type_id as typeId,
+        t.type_code as typeCode,
+        t.type_name as typeName,
+        t.type_desc as typeDesc,
+        t.`status`
+        FROM
+        cms_dictionary_type AS t
+        <where>
+            1=1
+            <if test="typeId!=null">
+                and t.type_id =#{typeId}
+            </if>
+            <if test="typeCode!=null and typeCode!=''">
+                and t.type_cod=#{typeCode}
+            </if>
+            <if test="typeName!=null and typeName!=''">
+                and t.type_name LIKE concat(concat('%',#{typeName}),'%')
+            </if>
+            <if test="status!=null ">
+                and t.`status`=#{status}
+            </if>
+        </where>
+        order by t.type_id
+        <choose>
+            <when test="startRow!=null and rows!=null">
+                limit #{startRow},#{rows}
+            </when>
+        </choose>
+
+    </select>
+
+    <select id="countDictionaryType" parameterType="DictionaryType" resultType="int">
+        SELECT
+        count(*)
+        FROM
+        cms_dictionary_type AS t
+        <where>
+            1=1
+            <if test="typeId!=null">
+                and t.type_id =#{typeId}
+            </if>
+            <if test="typeCode!=null and typeCode!=''">
+                and t.type_cod=#{typeCode}
+            </if>
+            <if test="typeName!=null and typeName!=''">
+                and t.type_name LIKE concat(concat('%',#{typeName}),'%')
+            </if>
+            <if test="status!=null ">
+                and t.`status`=#{status}
+            </if>
+        </where>
+    </select>
+
+    <select id="getDictionaries" resultType="Dictionary" parameterType="Dictionary">
+        SELECT
+        d.dictionary_id as dictionaryId,
+        d.type_id as typeId,
+        d.`key`,
+        d.`value`,
+        d.`status`,
+        t.type_code as typeCode,
+        t.type_name as typeName
+        FROM
+        cms_dictionary AS d
+        LEFT JOIN cms_dictionary_type AS t
+        ON d.type_id=t.type_id
+        <where>
+            1=1
+            <if test="dictionaryId!=null">
+                and d.dictionary_id =#{dictionaryId}
+            </if>
+            <if test="typeId!=null">
+                and d.type_id =#{typeId}
+            </if>
+            <if test="typeCode!=null and typeCode!=''">
+                and d.type_code =#{typeCode}
+            </if>
+            <if test="typeName!=null and typeName!=''">
+                and d.type_name LIKE concat(concat('%',#{typeName}),'%')
+            </if>
+            <if test="key!=null and key!=''">
+                and d.`key` =#{key}
+            </if>
+            <if test="value!=null and value!=''">
+                and d.`value` =#{value}
+            </if>
+            <if test="status!=null ">
+                and d.`status`=#{status}
+            </if>
+        </where>
+        order by d.dictionary_id
+        <choose>
+            <when test="startRow!=null and rows!=null">
+                limit #{startRow},#{rows}
+            </when>
+        </choose>
+
+    </select>
+
+    <select id="getDictionariesByType" resultType="Dictionary" parameterType="string">
+        SELECT
+        d.dictionary_id as dictionaryId,
+        d.`key`,
+        d.`value`
+        FROM
+        cms_dictionary AS d
+        LEFT JOIN cms_dictionary_type AS t
+        ON d.type_id=t.type_id
+        where t.type_code =#{typeCode}
+
+        order by d.dictionary_id
+
+    </select>
+
+    <select id="countDictionary" parameterType="Dictionary" resultType="int">
+        SELECT
+        count(*)
+        FROM
+        cms_dictionary AS d
+        LEFT JOIN cms_dictionary_type AS t
+        ON d.type_id=t.type_id
+        <where>
+            1=1
+            <if test="dictionaryId!=null">
+                and d.dictionary_id =#{dictionaryId}
+            </if>
+            <if test="typeId!=null">
+                and d.type_id =#{typeId}
+            </if>
+            <if test="typeCode!=null and typeCode!=''">
+                and d.type_code =#{typeCode}
+            </if>
+            <if test="typeName!=null and typeName!=''">
+                and d.type_name LIKE concat(concat('%',#{typeName}),'%')
+            </if>
+            <if test="key!=null and key!=''">
+                and d.`key` =#{key}
+            </if>
+            <if test="value!=null and value!=''">
+                and d.`value` =#{value}
+            </if>
+            <if test="status!=null ">
+                and d.`status`=#{status}
+            </if>
+        </where>
+    </select>
+
+
+    <select id="getDictionariesList" resultType="Dictionary" parameterType="integer">
+        SELECT
+        d.dictionary_id as dictionaryId,
+        d.type_id as typeId,
+        d.`key`,
+        d.`value`,
+        d.`status`
+        FROM cms_dictionary d
+        WHERE
+           d.type_id =#{typeId}
+    </select>
+
+    <select id="getDictionaryMap" resultMap="dictionaryMap">
+       SELECT
+        t.type_id as typeId,
+        t.type_code as typeCode,
+        t.type_name as typeName
+        FROM
+        cms_dictionary_type AS t
+    </select>
+</mapper>

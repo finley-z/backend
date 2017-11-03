@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- BEGIN HEAD -->
+<head>
+    <meta charset="utf-8"/>
+    <title>通知公告详情</title>
+</head>
+
+<body class="page-header-fixed page-sidebar-closed-hide-logo page-content-white">
+<div class="portlet light bordered">
+    <div class="portlet-title">
+        <div class="caption font-dark">
+            <i class="icon-settings font-dark"></i>
+            <span class="caption-subject bold uppercase">通知公告</span>
+        </div>
+        <div class="actions">
+            <div class="btn-group btn-group-devided" data-toggle="buttons">
+                <!--#if(goback=="yes")-->
+                <a href="javascript:;" class="btn yellow-crusta" id="goback">
+                    <i class="fa fa-mail-forward"></i>返回
+                </a>
+                <!--#end-->
+            </div>
+        </div>
+    </div>
+    <div class="portlet-body">
+        <div id="noticeTitle" style="text-align: center" ></div>
+       <div id="contentWrapper">
+
+       </div>
+        <div style="text-align: right">发布时间: <span id="createTime"></span></div>
+    </div>
+</div>
+
+<!-- 实例化编辑器 -->
+<script type="text/javascript">
+    var noticeId="${noticeId}";
+    $(function () {
+        $.ajax({
+            url:"${ctx}/notice/findNotice",
+            method:"post",
+            data:{noticeId:noticeId},
+            success:function(data){
+                data=eval(data);
+                var content=data.noticeContent;
+                var noticeTitle=data.noticeTitle;
+                var createTime=data.createTime;
+                $("#contentWrapper").html(content);
+                $("#noticeTitle").html(noticeTitle);
+                $("#createTime").html(TimerUtil.transFormDate(createTime));
+            }
+        })
+        $("#goback").click(function () {
+            Layout.loadAjaxContent("${ctx}/notice/toNotice");
+        });
+    });
+</script>
+
+</body>
+
+</html>

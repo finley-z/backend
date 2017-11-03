@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- BEGIN HEAD -->
+<head>
+    <meta charset="utf-8"/>
+    <title>用户管理</title>
+</head>
+<!-- END HEAD -->
+
+<body class="page-header-fixed page-sidebar-closed-hide-logo page-content-white">
+<div class="portlet light bordered">
+
+    <div class="tabbable-custom">
+        <ul class="nav nav-tabs user-type-selector">
+            <li class="active" type-data="s">
+                <a href="#tab_5_1" data-toggle="tab"><i class="fa fa-user-plus"></i> 系统用户</a>
+            </li>
+
+            <li style="float: right">
+                <div class="btn-group btn-group-devided" data-toggle="buttons">
+                    <a class="btn btn-sm green sys-btn" onclick="addUser()"> 新增
+                        <i class="fa fa-plus"></i>
+                    </a>
+                    &nbsp;&nbsp;
+                    <a class="btn btn-sm yellow sys-btn" onclick="edit()"> 编辑
+                        <i class="fa fa-edit"></i>
+                    </a>
+
+                    <!--<a class="btn btn-sm red" onclick="del()"> 删除-->
+                        <!--<i class="fa fa-remove"></i>-->
+                    <!--</a>-->
+                </div>
+                <div class="btn-group">
+                    <button class="btn blue btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">更多操作
+                        <i class="fa fa-angle-down"></i>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li>
+                            <a href="javascript:;" onclick="lockUser()">锁定</a>
+                        </li>
+                        <li>
+                            <a href="javascript:;" onclick="enabledUser()">启用</a>
+                        </li>
+                        <li class="divider"> </li>
+                        <li>
+                            <a href="javascript:;" onclick="resetPassword()">重置密码</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane active" id="tab_5_1">
+                <div class="portlet-body">
+                    <div class="row">
+
+                    </div>
+                    <div class="table-scrollable">
+                        <table class="table table-striped table-bordered  table-header-fixed table-hover table-checkable order-column dataTable no-footer "
+                               id="sysUserTable" role="grid" aria-describedby="sample_1_info">
+                            <thead>
+                            <tr role="row">
+                                <th rowspan="1" colspan="1" style="width: 106px;">
+                                    <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
+                                        <input type="checkbox" class="group-checkable"
+                                               data-set="#sample_1 .checkboxes">
+                                        <span></span>
+                                    </label>
+                                </th>
+                                <th tabindex="0" aria-controls="sample_1" rowspan="1" colspan="1" style="width: 80px;">
+                                    用户ID
+                                </th>
+                                <th tabindex="0" aria-controls="sample_1" rowspan="1" colspan="1" style="width: 150px;">
+                                    用户名
+                                </th>
+                                <th tabindex="0" aria-controls="sample_1" rowspan="1" colspan="1" style="width: 216px;">
+                                    真实姓名
+                                </th>
+                                <th tabindex="0" aria-controls="sample_1" rowspan="1" colspan="1" style="width: 216px;">
+                                    联系电话
+                                </th>
+                                <th tabindex="0" aria-controls="sample_1" rowspan="1" colspan="1" style="width: 208px;">
+                                    状态
+                                </th>
+                                <th tabindex="0" aria-controls="sample_1" rowspan="1" colspan="1" style="width: 208px;">
+                                    角色
+                                </th>
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--用户新增弹出框-->
+<div id="userModal" class="modal fade" tabindex="3" data-focus-on="input:first">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+        <h4 class="modal-title">
+            <i class="icon-bubble font-green-sharp"></i>
+            <span class="caption-subject font-green-sharp bold uppercase">系统用户管理</span>
+        </h4>
+    </div>
+    <div class="modal-body">
+        <div class="portlet-body form">
+            <form class="form-horizontal" role="form" id="userForm">
+                <input name="userId" type="hidden"/>
+                <div class="form-body">
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">用户名
+                            <font color="#0caeff">*</font>
+                        </label>
+                        <div class="col-md-9">
+                            <div class="input-icon">
+                                <i class="fa fa-user"></i>
+                                <input type="text" name="userName" class="form-control" placeholder="请输入用户名...">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">真实姓名
+                            <font color="#0caeff">*</font>
+                        </label>
+                        <div class="col-md-9">
+                            <div class="input-icon">
+                                <i class="fa fa-user-md"></i>
+                                <input type="text" name="realName" class="form-control" placeholder="请输入用户真实姓名...">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">用户角色</label>
+                        <div class="col-md-9">
+                            <select class="form-control" name="roleId" id="roleSelector">
+
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">用户状态</label>
+                        <div class="col-md-9">
+                            <select class="form-control" name="status">
+                                <option value="0">锁定</option>
+                                <option value="1">正常</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">手机号码</label>
+                        <div class="col-md-9">
+                            <div class="input-icon">
+                                <i class="fa fa-phone"></i>
+                                <input type="text" name="phone" class="form-control" placeholder="请输入手机号码...">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">电子邮箱</label>
+                        <div class="col-md-9">
+                            <div class="input-icon">
+                                <i class="fa fa-envelope"></i>
+                                <input type="text" name="email" class="form-control" placeholder="请输入邮箱地址...">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" data-dismiss="modal" class="btn default">取消</button>
+        <button type="button" class="btn green m-icon" id="saveUser">保存</button>
+    </div>
+</div>
+<!--用户新增弹出框结束-->
+<script type="text/javascript">
+    var roleList,sysUserTable,a = 0;
+    $(function () {
+        $.ajax({
+            "url": "${ctx}/role/list",
+            "type": "POST",
+            async: false,
+            success: function (data) {
+                data = eval(data);
+                roleList = data.data;
+                $.each(roleList, function (i, n) {
+                    var itemElement = $("<option></option>");
+                    itemElement.html(n.roleName);
+                    itemElement.val(n.roleId);
+                    $("#roleSelector").append(itemElement);
+                });
+            }
+        })
+        App.getViewPort().width < App.getResponsiveBreakpoint("md") ? $(".page-header").hasClass("page-header-fixed-mobile") && (a = $(".page-header").outerHeight(!0)) : $(".page-header").hasClass("navbar-fixed-top") ? a = $(".page-header").outerHeight(!0) : $("body").hasClass("page-header-fixed") && (a = 64);
+        sysUserTable=$("#sysUserTable").DataTable({
+            ajax: {
+                "url": "${ctx}/user/findSysUsers",
+                "type": "POST",
+                async: false,
+                "data": function (d) {
+                    d.page = $("#sysUserTable").DataTable().page() + 1;
+                    var row = $("select[name='sysUserTable_length']").val();
+                    d.rows = row == undefined ? 0 : row;
+                }
+            },
+            "bProcessing": true,
+            "bStateSave": !0,
+            "lengthMenu": [5, 15, 20],
+            "lengthChange": true,
+            "pageLength": 5,
+            "pagingType": "bootstrap_extended",
+            "fixedHeader": {"header": !0, "headerOffset": a},
+            "ordering": false,
+            "bInfo": true,
+            "processing": true,
+            "serverSide": true,
+            "searching": false,
+            "columns": [
+                {
+                    "data": "userId", "render": function (data, type, full, meta) {
+                    return "<label class='mt-checkbox mt-checkbox-single mt-checkbox-outline'>" +
+                            "<input type='checkbox' class='checkboxes' value='" + data + "' /><span></span></label>";
+                }
+                },
+                {"data": "userId"},
+                {"data": "userName"},
+                {"data": "realName"},
+                {"data": "phone"},
+                {
+                    "data": "status", "render": function (data, type, full, meta) {
+                    var label;
+                    if (data == null || data == undefined) {
+                        label = "<span class='label label label-danger'>未知</span>";
+                        return label;
+                    }
+                    if (data == 1) {
+                        label = "<span class='label label label-success'>正常</span>";
+                    }
+                    if (data == 0) {
+                        label = "<span class='label label label-danger'>锁定</span>";
+                    }
+                    return label;
+                }
+                },
+                {
+                    "data": null, "render": function (data, type, full, meta) {
+                    var html = $("<div></div>");
+                    var roleId = full.roleId;
+                    var roleSel = $("<select class='seleRole'></select>").attr("userId", full.userId).appendTo(html);
+                    $.each(roleList, function (i, n) {
+                        var option = $("<option></option>").html(n.roleName).val(n.roleId);
+                        if (roleId == n.roleId) {
+                            option.attr("selected", "selected");
+                        }
+                        option.appendTo(roleSel);
+                    });
+                    return html.html();
+                }
+                }
+            ],
+            "dom": 'rt<"bottom"ilp<"clear">>',
+            "language": {
+                aria: {
+                    sortAscending: ": activate to sort column ascending",
+                    sortDescending: ": activate to sort column descending"
+                },
+                emptyTable: "暂无记录",
+                info: "显示 _START_ - _END_ / 共: _TOTAL_ 条 ",
+                infoEmpty: "暂无记录",
+                lengthMenu: "  _MENU_ 条",
+                search: "查询:",
+                zeroRecords: "暂无记录",
+                paginate: {previous: "上一页", next: "下一页", last: "尾页", first: "首页", "page": "", "pageOf": ""}
+            }
+        });
+
+        $(document).on("change", ".seleRole", function () {
+            var roleId = $(this).find('option:selected').val();
+            var userId = $(this).attr("userId");
+            $.ajax({
+                "url": "/user/modifyRole",
+                "type": "POST",
+                data: {roleId: roleId, userId: userId},
+                success: function (data) {
+                    data = eval(data);
+                    if (data.status) {
+                        swal("Oops...", "修改成功!", "success");
+                    } else {
+                        swal("Oops...", "修改失败:" + data.errorMsg, "error");
+                    }
+                }
+            })
+        })
+
+        $("#saveUser").click(function(){
+            var bv = $("#userForm").data('bootstrapValidator');
+            bv.validate();
+            if (bv.isValid()) {
+            $.ajax({
+                url: "${ctx}/user/saveUser",
+                type: "post",
+                async: false,
+                data: $("#userForm").serialize(),
+                success: function (data) {
+                    data = eval(data);
+                    if (data.status) {
+                        Table.reload(sysUserTable);
+                        $('#userModal').modal('hide');
+                        swal("Oops...", "保存成功!", "success");
+                    } else {
+                        $('#userModal').modal('hide');
+                        swal("Oops...", "保存失败:" + data.errorMsg, "error");
+                    }
+                },
+                error: function (data) {
+                    $('#userModal').modal('hide');
+                    swal("Oops...", "保存出错：" + data.errorMsg, "error");
+                }
+            })
+            }
+        })
+
+        $("#agentUser").click(function(){
+            initAgentTable();
+        });
+        $(".user-type-selector li").click(function(){
+            var type=$(this).attr("type-data");
+            if(type=='a'){
+                $(".sys-btn").hide();
+            }else if(type=='s'){
+                $(".sys-btn").show();
+            }
+        });
+        $('#userForm').bootstrapValidator({
+            message: '请输入正确的值',
+            submitButtons: '#saveUser',
+            fields: {
+                userName: {
+                    message: '用户名不能为空',
+                    validators: {
+                        notEmpty: {
+                            message: '用户名不能为空'
+                        },
+                        remote: {
+                            url: '${ctx}/user/isUserNameExist',      //验证地址
+                            message: '用户名已存在', //提示消息
+                            delay :  1000,          //每输入一个字符，就发ajax请求，服务器压力还是太大，设置2秒发送一次ajax（默认输入一个字符，提交一次，服务器压力太大）
+                            type: 'POST'           //请求方式
+                        }
+                    }
+                },
+                realName: {
+                    message: '真实姓名不能为空',
+                    validators: {
+                        notEmpty: {
+                            message: '真实姓名不能为空'
+                        }
+                    }
+                },
+                roleId: {
+                    message: '角色不能为空',
+                    validators: {
+                        notEmpty: {
+                            message: '角色不能为空'
+                        }
+                    }
+                },
+                status: {
+                    message: '用户初始状态不能为空',
+                    validators: {
+                        notEmpty: {
+                            message: '用户初始状态不能为空'
+                        }
+                    }
+                }
+            }
+        });
+    })
+
+    function addUser(){
+        Form.clear("userForm");
+        $("#userModal").modal('show');
+    }
+
+    function edit(){
+        var ids = Table.getSelectIds(sysUserTable);
+        var length = ids.length;
+        if (length != 1) {
+            if (length < 1) {
+                swal("Oops...", "请选择您需要编辑的记录！", "info");
+            } else if (length > 1) {
+                swal("Oops...", "一次只能编辑一条信息！", "info");
+            }
+            return;
+        }
+        $.ajax({
+            url: "${ctx}/user/getUser",
+            type: "post",
+            data: {userId: ids[0]},
+            success: function (data) {
+                Form.load("userForm", data);
+                $("#userModal").modal('show');
+            }
+        })
+    }
+
+    function lockUser(){
+        var table=getTable();
+        var ids = Table.getSelectIds(table);
+        var length = ids.length;
+        if (length != 1) {
+            swal("Oops...", "请选择您需要锁定的用户！", "info");
+            return;
+        }
+        $.ajax({
+            url: "${ctx}/user/lockUser",
+            type: "post",
+            async: false,
+            data: {userId:ids[0]},
+            success: function (data) {
+                data = eval(data);
+                if (data.status) {
+                    Table.reload(table);
+                    swal("Oops...", "锁定成功!", "success");
+                } else {
+                    swal("Oops...", "锁定失败:" + data.errorMsg, "error");
+                }
+            },
+            error: function (data) {
+                swal("Oops...", "锁定出错：" + data.errorMsg, "error");
+            }
+        })
+    }
+
+    function enabledUser(){
+        var table=getTable();
+        var ids = Table.getSelectIds(table);
+        var length = ids.length;
+        if (length != 1) {
+            swal("Oops...", "请选择您需要解锁的用户！", "info");
+            return;
+        }
+        $.ajax({
+            url: "${ctx}/user/enabledUser",
+            type: "post",
+            async: false,
+            data: {userId:ids[0]},
+            success: function (data) {
+                data = eval(data);
+                if (data.status) {
+                    Table.reload(table);
+                    swal("Oops...", "启用成功!", "success");
+                } else {
+                    swal("Oops...", "启用失败:" + data.errorMsg, "error");
+                }
+            },
+            error: function (data) {
+                swal("Oops...", "启用出错：" + data.errorMsg, "error");
+            }
+        })
+    }
+
+    function resetPassword(){
+        var table=getTable();
+        var ids = Table.getSelectIds(table);
+        var length = ids.length;
+        if (length != 1) {
+            swal("Oops...", "请选择您需要重置密码的用户！", "info");
+            return;
+        }
+        $.ajax({
+            url: "${ctx}/user/resetPassword",
+            type: "post",
+            async: false,
+            data: {userId:ids[0]},
+            success: function (data) {
+                data = eval(data);
+                if (data.status) {
+                    swal("Oops...", "重置成功!", "success");
+                } else {
+                    swal("Oops...", "重置失败:" + data.errorMsg, "error");
+                }
+            },
+            error: function (data) {
+                swal("Oops...", "重置出错：" + data.errorMsg, "error");
+            }
+        })
+    }
+
+</script>
+</body>
+
+</html>

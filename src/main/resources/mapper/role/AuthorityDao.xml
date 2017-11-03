@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.finley.module.authority.dao.AuthorityDao">
+
+    <resultMap id="AuthorityMap" type="Authority">
+        <collection property="subAuthority" javaType="List" ofType="Authority" column="parent_id" select="getSubAuthority" foreignColumn="parent_id">
+
+        </collection>
+    </resultMap>
+
+    <insert id="addAuthority" parameterType="Authority">
+        insert into cms_authority(authority_name,url,authority_level,status,parent_id)
+            values(#{authorityName},#{url},#{level},#{status},#{parentId})
+    </insert>
+
+    <insert id="addRole" parameterType="Role">
+        insert into cms_role(role_name,role_desc,status)
+        values(#{roleName},#{roleDesc},#{status})
+    </insert>
+
+    <update id="updateAuthority" parameterType="Authority">
+       update  cms_authority
+        <trim prefix="set" suffixOverrides=",">
+            <if test="authorityName != null and authorityName!=''">
+                authority_name=#{authorityName},
+            </if>
+            <if test="url != null and url!=''">
+                url=#{url},
+            </if>
+            <if test="level != null">
+                authority_level=#{level},
+            </if>
+            <if test="status != null ">
+                status=#{status},
+            </if>
+            <if test="parentId != null">
+                parent_id=#{parentId},
+            </if>
+        </trim>
+        where authority_id=#{id}
+    </update>
+
+    <delete id="deleteAuths" parameterType="java.util.List">
+        delete from cms_authority where authority_id in
+        <foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="getByCondition" resultType="Authority" >
+        select
+            authority_id as id,
+            authority_name as authorityName,
+            url,
+            authority_level as level,
+            status,
+            parent_id as parentId
+        from
+        cms_authority
+            <where>
+                1=1
+                <if test="id!=null">
+                    and authority_id=#{id}
+                </if>
+                <if test="authorityName!=null and authorityName!=''">
+                    and authority_name=#{authorityName}
+                </if>
+                <if test="url!=null and url!=''">
+                    and url=#{url}
+                </if>
+                <if test="level!=null ">
+                    and authority_level=#{level}
+                </if>
+                <if test="status!=null ">
+                    and status=#{status}
+                </if>
+                <if test="parentId!=null ">
+                    and parent_id=#{parentId}
+                </if>
+            </where>
+    </select>
+
+    <select id="getAuthorityByCondition" resultType="Authority" parameterType="integer">
+        select
+        authority_id as id,
+        authority_name as authorityName,
+        url,
+        authority_level as level,
+        status,
+        parent_id as parentId
+        from
+        cms_authority
+        where authority_id=#{id}
+
+    </select>
+
+    <select id="getAuthorityMap" resultMap="AuthorityMap" parameterType="Authority">
+         SELECT
+            authority_id as id,
+            authority_name as authorityName,
+            url,
+            authority_level as level,
+            status,
+            parent_id as parentId
+          FROM
+            cms_authority
+            where parent_id is null
+    </select>
+
+    <select id="getRoleAuths" resultType="RoleAuth" parameterType="RoleAuth">
+       SELECT
+         auth_id as authId,
+         role_id as roleId,
+         status
+         FROM cms_role_auth
+         <where>
+             1=1
+             <if test="authId!=null">
+                and  auth_id=#{authId}
+             </if>
+             <if test="roleId!=null">
+                 and  role_id=#{roleId}
+             </if>
+         </where>
+    </select>
+
+</mapper>

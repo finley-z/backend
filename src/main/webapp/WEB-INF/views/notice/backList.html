@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<!--#set(com.finley.module.notice.entity.Notice notice)-->
+<html lang="en">
+<!-- BEGIN HEAD -->
+<head>
+    <meta charset="utf-8"/>
+    <title>通知公告</title>
+</head>
+
+<body class="page-header-fixed page-sidebar-closed-hide-logo page-content-white">
+<div class="portlet light bordered">
+    <div class="portlet-title">
+        <div class="caption font-dark">
+            <i class="icon-settings font-dark"></i>
+            <span class="caption-subject bold uppercase">通知公告</span>
+        </div>
+    </div>
+    <div class="portlet-body">
+        <div class="mt-comments notice-list">
+
+        </div>
+    </div>
+</div>
+
+<!-- 实例化编辑器 -->
+<script type="text/javascript">
+    $(function () {
+        Notice.generateNoticeListTab(2);
+        $(document).on("click",".notice-item",function(){
+            var url=$(this).attr("data-href");
+            Layout.loadAjaxContent(url);
+        });
+    });
+</script>
+
+</body>
+
+</html>

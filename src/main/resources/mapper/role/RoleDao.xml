@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.finley.module.authority.dao.RoleDao">
+
+    <insert id="addRole" parameterType="Role">
+        insert into cms_role(role_name,role_desc,status)
+         values(#{roleName},#{roleDesc},#{status})
+    </insert>
+
+    <update id="updateRole" parameterType="Role">
+        update  cms_role
+        <trim prefix="set" suffixOverrides=",">
+            <if test="roleName != null and roleName!=''">
+                role_name=#{roleName},
+            </if>
+            <if test="roleDesc != null and roleDesc!=''">
+                role_desc=#{roleDesc},
+            </if>
+            <if test="status != null">
+                status=#{status},
+            </if>
+        </trim>
+        where authority_id=#{id}
+    </update>
+
+    <delete id="deleteRoles" parameterType="java.util.List">
+        delete from cms_role where role_id in
+        <foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="getRolesByCondition" resultType="Role" parameterType="Role">
+        SELECT
+        role_id as roleId,
+        role_name as roleName,
+        role_desc roleDesc,
+        status
+        FROM
+        cms_role
+        <where>
+            1=1
+            <if test="roleId!=null">
+                and role_id=#{roleId}
+            </if>
+            <if test="roleName!=null and roleName!=''">
+                and role_name=#{roleName}
+            </if>
+            <if test="status!=null ">
+                and status=#{status}
+            </if>
+        </where>
+        <choose>
+            <when test="startRow!=null and rows!=null">
+                limit #{startRow},#{rows}
+            </when>
+        </choose>
+    </select>
+
+
+
+
+    <select id="countRoles" parameterType="Role" resultType="int">
+        select count(*) from cms_role
+        <where>
+            1=1
+            <if test="roleId!=null">
+                and role_id=#{roleId}
+            </if>
+            <if test="roleName!=null and roleName!=''">
+                and role_name=#{roleName}
+            </if>
+
+            <if test="status!=null ">
+                and status=#{status}
+            </if>
+        </where>
+    </select>
+
+    <delete id="deleteAuths" parameterType="integer">
+        delete from cms_role_auth where role_id=#{roleId}
+    </delete>
+
+    <insert id="grantAuths" parameterType="java.util.List">
+        insert into cms_role_auth(role_id,auth_id,status) values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.roleId,jdbcType=INTEGER},#{item.authId,jdbcType=INTEGER},#{item.status,jdbcType=INTEGER})
+        </foreach>
+    </insert>
+
+    <select id="getRoleAuthoritys" parameterType="integer" resultType="Authority">
+        select
+        authority_id as id,
+        authority_name as authorityName,
+        url,
+        authority_level as level,
+        status,
+        parent_id as parentId
+        from
+        cms_authority where authority_id in(select auth_id from cms_role_auth where role_id=#{roleId})
+    </select>
+
+    <select id="getRole" resultType="Role" parameterType="integer">
+        SELECT
+        role_id as roleId,
+        role_name as roleName,
+        role_desc roleDesc,
+        status
+        FROM
+        cms_role
+        where role_id=#{roleId}
+
+    </select>
+</mapper>

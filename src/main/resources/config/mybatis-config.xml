@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <properties>
+        <property name="dialect" value="mySql"/>
+    </properties>
+
+    <!--声明mybatis映射文件中，类型的别名，而非全部写成全类名-->
+    <typeAliases>
+        <package name="com.finley.module.authority.entity"></package>
+        <package name="com.finley.module.user.entity"></package>
+        <package name="com.finley.module.notice.entity"></package>
+        <package name="com.finley.module.dictionary.entity"></package>
+    </typeAliases>
+</configuration>
